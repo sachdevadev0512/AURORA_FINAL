@@ -28,15 +28,15 @@ function App() {
   const { user } = useAuth();
 
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
-      <Route path="/amazon-oauth-callback" element={<AmazonOAuthCallback />} />
-      <Route path="/" element={<Home />} />
-      <Route
-        path="/*"
-        element={
-          <NotificationProvider>
+    <NotificationProvider>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
+        <Route path="/amazon-oauth-callback" element={<AmazonOAuthCallback />} />
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/*"
+          element={
             <Layout>
               <Routes>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -57,10 +57,10 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
-          </NotificationProvider>
-        }
-      />
-    </Routes>
+          }
+        />
+      </Routes>
+    </NotificationProvider>
   );
 }
 

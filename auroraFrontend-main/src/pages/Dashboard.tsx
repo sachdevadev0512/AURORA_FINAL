@@ -399,7 +399,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="apple-kpi-value-row">
-              <span className="apple-kpi-number">{summary.totalOrders.toLocaleString()}</span>
+              <span className="apple-kpi-number">
+                {loading && !analytics ? '...' : summary.totalOrders.toLocaleString()}
+              </span>
               {formatComparison(summary.totalOrders, previous.totalOrders) && (
                 <span className="apple-kpi-trend">
                   {formatComparison(summary.totalOrders, previous.totalOrders)}
@@ -416,7 +418,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="apple-kpi-value-row">
-              <span className="apple-kpi-number">{formatMoney(summary.totalRevenue)}</span>
+              <span className="apple-kpi-number">
+                {loading && !analytics ? '...' : formatMoney(summary.totalRevenue)}
+              </span>
               {formatComparison(summary.totalRevenue, previous.totalRevenue) && (
                 <span className="apple-kpi-trend">
                   {formatComparison(summary.totalRevenue, previous.totalRevenue)}
@@ -433,7 +437,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="apple-kpi-value-row">
-              <span className="apple-kpi-number">{formatMoney(summary.averageOrderValue)}</span>
+              <span className="apple-kpi-number">
+                {loading && !analytics ? '...' : formatMoney(summary.averageOrderValue)}
+              </span>
               {formatComparison(summary.averageOrderValue, previous.averageOrderValue) && (
                 <span className="apple-kpi-trend">
                   {formatComparison(summary.averageOrderValue, previous.averageOrderValue)}
@@ -450,7 +456,9 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="apple-kpi-value-row">
-              <span className="apple-kpi-number">{productCounts.active.toLocaleString()}</span>
+              <span className="apple-kpi-number">
+                {loading && !analytics ? '...' : productCounts.active.toLocaleString()}
+              </span>
               {productCounts.listed > 0 && (
                 <span className="apple-kpi-trend">{`${productCounts.listed} listed`}</span>
               )}
@@ -472,7 +480,17 @@ export default function Dashboard() {
             </div>
 
             <div style={{ width: '100%', height: 240, marginTop: '1rem' }}>
-              {revenueChartData.some((row) => row.revenue > 0) ? (
+              {loading && !analytics ? (
+                <div className="apple-empty-state" style={{ minHeight: 180, padding: '1.5rem' }}>
+                  <div className="apple-empty-icon" style={{ animation: 'spin 1s linear infinite' }}>
+                    <span className="material-symbols-outlined">sync</span>
+                  </div>
+                  <h3 className="apple-empty-heading">Loading revenue data...</h3>
+                  <p className="apple-empty-text" style={{ margin: 0 }}>
+                    Fetching sales performance and order trends...
+                  </p>
+                </div>
+              ) : revenueChartData.some((row) => row.revenue > 0) ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueChartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F0F0F2" />
@@ -518,7 +536,17 @@ export default function Dashboard() {
 
           {/* Orders / Distribution Column */}
           <div className="apple-card" style={{ justifyContent: 'center' }}>
-            {summary.totalOrders > 0 || pieData.length > 0 ? (
+            {loading && !analytics ? (
+              <div className="apple-empty-state" style={{ minHeight: 180, padding: '1.5rem' }}>
+                <div className="apple-empty-icon" style={{ animation: 'spin 1s linear infinite' }}>
+                  <span className="material-symbols-outlined">sync</span>
+                </div>
+                <h3 className="apple-empty-heading">Loading order data...</h3>
+                <p className="apple-empty-text" style={{ margin: 0 }}>
+                  Fetching order status breakdown...
+                </p>
+              </div>
+            ) : summary.totalOrders > 0 || pieData.length > 0 ? (
               <div>
                 <div className="apple-card-header-bar">
                   <div>

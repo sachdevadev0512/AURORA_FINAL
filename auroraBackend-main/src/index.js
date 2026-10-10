@@ -181,6 +181,12 @@ async function startServer() {
   const { app, server } = await createApp();
   const PORT = process.env.PORT || 5000;
 
+  try {
+    require('./aiBridge');
+  } catch (err) {
+    console.warn('[AI Bridge] Failed to start:', err.message);
+  }
+
   server.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);
     await runStartupWorkers();

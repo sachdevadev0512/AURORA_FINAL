@@ -27,6 +27,8 @@ const { reportItemQuantity } = require('../utils/orderReportUtils');
 const { sleep, mapWithConcurrency } = require('../utils/async');
 const { scheduleCustomerReturnsSync } = require('../services/customerReturnsService');
 const { scheduleCustomerRefundsSync } = require('../services/customerRefundsService');
+const readResponseCache = require('../utils/readResponseCache');
+const inFlightAnalytics = new Map();
 
 /**
  * The timezone Amazon Seller Central uses to display this seller's orders.
@@ -1023,6 +1025,24 @@ const getOrderAnalytics = async (req, res, next) => {
       endDateKey,
     } = resolveAnalyticsDateRange(req.query, timeZone);
 
+    const cacheKey = `${days}:${preset}:${startDateKey}:${endDateKey}:${timeZone}`;
+    const cached = readResponseCache.get('order:analytics', sellerId, cacheKey);
+    if (cached) {
+      return res.status(200).json({
+        success: true,
+        data: cached,
+      });
+    }
+
+    const dedupeKey = `${String(sellerId)}:${cacheKey}`;
+    if (inFlightAnalytics.has(dedupeKey)) {
+      const data = await inFlightAnalytics.get(dedupeKey);
+      return res.status(200).json({
+        success: true,
+        data,
+      });
+    }
+
     const dateFilter = {
       sellerId,
       purchaseDate: { $gte: startDate, $lte: endDate },
@@ -1053,6 +1073,12 @@ const getOrderAnalytics = async (req, res, next) => {
         : { sellerId };
 
     const orderFacetResults = await Order.aggregate([
+      {
+        $match: {
+          sellerId,
+          purchaseDate: { $gte: prevStart, $lte: endDate },
+        },
+      },
       {
         $facet: {
           totalStats: summarizeOrdersPipeline(dateFilter),
@@ -1164,7 +1190,17 @@ const getOrderAnalytics = async (req, res, next) => {
       countListedProducts(sellerId),
     ]);
 
-    const allTimeStats = await Order.aggregate(summarizeOrdersPipeline(allTimeMatch));
+    const allTimeStats = await Order.aggregate([
+      { $match: allTimeMatch },
+      {
+        $group: {
+          _id: null,
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: { $ifNull: ['$orderTotal.amount', 0] } },
+          totalItems: { $sum: { $ifNull: ['$numberOfItemsShipped', 0] } },
+        },
+      },
+    ]);
 
     const summary = withAverageOrderValue(totalStats[0]);
     const allTimeSummary = withAverageOrderValue(allTimeStats[0]);
@@ -1210,6 +1246,8 @@ const getOrderAnalytics = async (req, res, next) => {
         analytics.profitMetrics.totalCOGS;
       analytics.profitMetrics.profitMargin = (analytics.profitMetrics.netProfit / analytics.profitMetrics.totalRevenue) * 100;
     }
+
+    readResponseCache.set('order:analytics', sellerId, cacheKey, analytics, 120000);
 
     res.status(200).json({
       success: true,

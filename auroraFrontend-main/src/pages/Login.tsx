@@ -6,8 +6,8 @@ import '../styles/auth.css';
 export default function Login() {
   const { login, error } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('rawyalusa@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 

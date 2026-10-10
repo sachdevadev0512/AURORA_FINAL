@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
+import emblemImg from '../assets/aurora-emblem.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -30,13 +31,14 @@ export default function Layout({ children }: LayoutProps) {
   const [transitionStage, setTransitionStage] = useState<'fadeIn' | 'fadeOut'>('fadeIn');
 
   useEffect(() => {
-    if (isLandingArrival) {
+    if ((location.state as any)?.fromLanding) {
+      setIsLandingArrival(true);
       const timer = setTimeout(() => {
         setIsLandingArrival(false);
       }, 900);
       return () => clearTimeout(timer);
     }
-  }, [isLandingArrival]);
+  }, [location]);
 
   useEffect(() => {
     if (location.pathname !== displayLocation.pathname) {
@@ -75,26 +77,56 @@ export default function Layout({ children }: LayoutProps) {
           <nav
             className="navbar"
             style={{
-              maxWidth: '1280px',
+              width: 'fit-content',
+              maxWidth: 'calc(100% - 2rem)',
               margin: '0 auto',
             }}
           >
             <div
               style={{
-                width: '100%',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
+                justifyContent: 'center',
+                gap: '0.65rem',
+                flexWrap: 'nowrap',
               }}
             >
+              {/* Brand Emblem Link to Landing Page */}
+              <Link
+                to="/"
+                title="Return to Home"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  textDecoration: 'none',
+                  flexShrink: 0,
+                  paddingRight: '0.2rem',
+                  transition: 'opacity 0.2s ease',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              >
+                <img
+                  src={emblemImg}
+                  alt="Aurora.AI"
+                  style={{
+                    height: '24px',
+                    width: 'auto',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.15))',
+                  }}
+                />
+              </Link>
+
               {/* Nav Links containing ALL app pages */}
               <div
                 className="navbar-links"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.35rem',
+                  justifyContent: 'center',
+                  flexWrap: 'nowrap',
+                  gap: '0.2rem',
                   overflowX: 'auto',
                   msOverflowStyle: 'none',
                   scrollbarWidth: 'none',
@@ -109,8 +141,10 @@ export default function Layout({ children }: LayoutProps) {
                       to={link.path}
                       className={isActive ? 'active' : ''}
                       style={{
-                        fontSize: '0.88rem',
+                        fontSize: '0.82rem',
                         whiteSpace: 'nowrap',
+                        padding: '0.38rem 0.68rem',
+                        flexShrink: 0,
                       }}
                     >
                       {link.label}

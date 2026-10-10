@@ -12,8 +12,8 @@ export default function AuthModal({ onClose, onSuccess }: AuthModalProps) {
 
   const [isLogin, setIsLogin] = useState(true);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('rawyalusa@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [isVisible, setIsVisible] = useState(false);

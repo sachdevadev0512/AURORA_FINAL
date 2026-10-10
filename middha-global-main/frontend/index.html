@@ -2095,7 +2095,11 @@
         return;
       }
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      ws = new WebSocket(`${proto}://${location.host}/ws/chat?token=${encodeURIComponent(token)}`);
+      try {
+        ws = new WebSocket(`${proto}://${location.host}/ws/chat`, ['bearer', token]);
+      } catch (e) {
+        ws = new WebSocket(`${proto}://${location.host}/ws/chat?token=${encodeURIComponent(token)}`);
+      }
 
       ws.onopen = () => console.log('[ws] connected');
 
